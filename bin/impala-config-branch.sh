@@ -77,7 +77,10 @@ elif [ -z "$CAULDRON_DOCKER_PLATFORM" ]; then
   export IMPALA_MAVEN_OPTIONS="-s ${MAVEN_CONFIG_FILE}"
 fi
 
-BUILD_REPO="http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/${CDH_GBN}"
+# Pick the build cache located in the AWS region where the builds happen.
+# TODO: Build smarter logic that figures this out dynamically. Optionally
+#       rely on the buildinfo tools.
+BUILD_REPO="http://cloudera-build-4-us-west-2.vpc.cloudera.com/s3/build/${CDH_GBN}"
 BUILD_REPO_BASE="${BUILD_REPO}/impala-minicluster-tarballs"
 
 if [ -z "$CAULDRON_DOCKER_PLATFORM" ]; then
