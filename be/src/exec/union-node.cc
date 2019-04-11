@@ -302,9 +302,9 @@ Status UnionNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos) {
 
   int num_rows_added = row_batch->num_rows() - num_rows_before;
   DCHECK_GE(num_rows_added, 0);
-  if (limit_ != -1 && num_rows_returned_ + num_rows_added > limit_) {
+  if (limit_ != -1 && num_rows_returned_.Load() + num_rows_added > limit_) {
     // Truncate the row batch if we went over the limit.
-    num_rows_added = limit_ - num_rows_returned_;
+    num_rows_added = limit_ - num_rows_returned_.Load();
     row_batch->set_num_rows(num_rows_before + num_rows_added);
     DCHECK_GE(num_rows_added, 0);
   }
@@ -313,7 +313,7 @@ Status UnionNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos) {
   *eos = ReachedLimit() ||
       (!HasMorePassthrough() && !HasMoreMaterialized() && !HasMoreConst(state));
 
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

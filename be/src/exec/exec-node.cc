@@ -147,7 +147,7 @@ Status ExecNode::Open(RuntimeState* state) {
 }
 
 Status ExecNode::Reset(RuntimeState* state, RowBatch* row_batch) {
-  num_rows_returned_ = 0;
+  num_rows_returned_.Store(0);
   for (int i = 0; i < children_.size(); ++i) {
     RETURN_IF_ERROR(children_[i]->Reset(state, row_batch));
   }
@@ -159,7 +159,7 @@ void ExecNode::Close(RuntimeState* state) {
   is_closed_ = true;
 
   if (rows_returned_counter_ != NULL) {
-    COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+    COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   }
   for (int i = 0; i < children_.size(); ++i) {
     children_[i]->Close(state);

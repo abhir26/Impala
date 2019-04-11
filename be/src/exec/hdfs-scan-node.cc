@@ -136,13 +136,13 @@ Status HdfsScanNode::GetNextInternal(
     // for the limit case but we want to avoid the synchronized writes to
     // num_rows_returned_.
     num_rows_returned_ += row_batch->num_rows();
-    COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+    COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
 
     if (ReachedLimit()) {
-      int num_rows_over = num_rows_returned_ - limit_;
+      int num_rows_over = num_rows_returned_.Load() - limit_;
       row_batch->set_num_rows(row_batch->num_rows() - num_rows_over);
       num_rows_returned_ -= num_rows_over;
-      COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+      COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
 
       *eos = true;
       SetDone();

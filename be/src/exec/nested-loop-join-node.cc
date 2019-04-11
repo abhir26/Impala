@@ -246,11 +246,11 @@ Status NestedLoopJoinNode::GetNext(
 
 end:
   if (ReachedLimit()) {
-    int64_t extra_rows = num_rows_returned_ - limit_;
+    int64_t extra_rows = num_rows_returned_.Load() - limit_;
     DCHECK_GE(extra_rows, 0);
     DCHECK_LE(extra_rows, output_batch->num_rows());
     output_batch->set_num_rows(output_batch->num_rows() - extra_rows);
-    num_rows_returned_ = limit_;
+    num_rows_returned_.Store(limit_);
     eos_ = true;
   }
   if (eos_) {
@@ -258,7 +258,7 @@ end:
     probe_batch_->TransferResourceOwnership(output_batch);
     build_batches_->TransferResourceOwnership(output_batch);
   }
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

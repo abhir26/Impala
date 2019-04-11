@@ -68,12 +68,12 @@ namespace impala {
       MACRO_CONCAT(SCOPED_TIMER_COUNTER, __COUNTER__)(c1, c2, c3, is_cancelled)
   #define COUNTER_ADD(c, v) (c)->Add(v)
   #define COUNTER_SET(c, v) (c)->Set(v)
-  #define ADD_THREAD_COUNTERS(profile, prefix) (profile)->AddThreadCounters(prefix)
-  #define SCOPED_THREAD_COUNTER_MEASUREMENT(c) \
-    ThreadCounterMeasurement \
-      MACRO_CONCAT(SCOPED_THREAD_COUNTER_MEASUREMENT, __COUNTER__)(c)
-  #define SCOPED_CONCURRENT_COUNTER(c)                                    \
-    ScopedStopWatch<RuntimeProfile::ConcurrentTimerCounter> MACRO_CONCAT( \
+#define COUNTER_SET_ATOMIC_SOURCE(c, v) (c)->Set(v.Load())
+#define ADD_THREAD_COUNTERS(profile, prefix) (profile)->AddThreadCounters(prefix)
+#define SCOPED_THREAD_COUNTER_MEASUREMENT(c) \
+  ThreadCounterMeasurement MACRO_CONCAT(SCOPED_THREAD_COUNTER_MEASUREMENT, __COUNTER__)(c)
+#define SCOPED_CONCURRENT_COUNTER(c)                                    \
+  ScopedStopWatch<RuntimeProfile::ConcurrentTimerCounter> MACRO_CONCAT( \
       SCOPED_CONCURRENT_COUNTER, __COUNTER__)(c)
 #else
   #define ADD_COUNTER(profile, name, unit) nullptr

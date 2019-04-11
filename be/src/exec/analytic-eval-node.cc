@@ -809,7 +809,7 @@ Status AnalyticEvalNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool*
     prev_pool_last_window_idx_ = -1;
   }
 
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

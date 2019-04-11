@@ -170,12 +170,12 @@ Status UnnestNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos) 
   // Checking the limit here is simpler/cheaper than doing it in the loop above.
   if (ReachedLimit()) {
     *eos = true;
-    row_batch->set_num_rows(row_batch->num_rows() - (num_rows_returned_ - limit_));
-    num_rows_returned_ = limit_;
+    row_batch->set_num_rows(row_batch->num_rows() - (num_rows_returned_.Load() - limit_));
+    num_rows_returned_.Store(limit_);
   } else if (item_idx_ == coll_value_->num_tuples) {
     *eos = true;
   }
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

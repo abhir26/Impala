@@ -192,7 +192,7 @@ Status ExchangeNode::GetNext(RuntimeState* state, RowBatch* output_batch, bool* 
         output_batch->CommitLastRow();
         ++num_rows_returned_;
       }
-      COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+      COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
 
       if (ReachedLimit()) {
         stream_recvr_->TransferAllResources(output_batch);
@@ -237,8 +237,9 @@ Status ExchangeNode::GetNextMerging(RuntimeState* state, RowBatch* output_batch,
 
   num_rows_returned_ += output_batch->num_rows();
   if (ReachedLimit()) {
-    output_batch->set_num_rows(output_batch->num_rows() - (num_rows_returned_ - limit_));
-    num_rows_returned_ = limit_;
+    output_batch->set_num_rows(
+        output_batch->num_rows() - (num_rows_returned_.Load() - limit_));
+    num_rows_returned_.Store(limit_);
     *eos = true;
   }
 
@@ -246,7 +247,7 @@ Status ExchangeNode::GetNextMerging(RuntimeState* state, RowBatch* output_batch,
   // by the merger to the output batch.
   if (*eos) stream_recvr_->TransferAllResources(output_batch);
 
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

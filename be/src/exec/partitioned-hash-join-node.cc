@@ -637,9 +637,9 @@ Status PartitionedHashJoinNode::GetNext(
   int num_rows_added = out_batch->num_rows() - num_rows_before;
   DCHECK_GE(num_rows_added, 0);
 
-  if (limit_ != -1 && num_rows_returned_ + num_rows_added > limit_) {
+  if (limit_ != -1 && num_rows_returned_.Load() + num_rows_added > limit_) {
     // Truncate the row batch if we went over the limit.
-    num_rows_added = limit_ - num_rows_returned_;
+    num_rows_added = limit_ - num_rows_returned_.Load();
     DCHECK_GE(num_rows_added, 0);
     out_batch->set_num_rows(num_rows_before + num_rows_added);
     probe_batch_->TransferResourceOwnership(out_batch);
@@ -647,7 +647,7 @@ Status PartitionedHashJoinNode::GetNext(
   }
 
   num_rows_returned_ += num_rows_added;
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

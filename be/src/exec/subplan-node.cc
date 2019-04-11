@@ -100,8 +100,8 @@ Status SubplanNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos)
         DCHECK(!row_batch->AtCapacity());
         RETURN_IF_ERROR(child(1)->GetNext(state, row_batch, &subplan_eos_));
         // Apply limit and check whether the output batch is at capacity.
-        if (limit_ != -1 && num_rows_returned_ + row_batch->num_rows() >= limit_) {
-          row_batch->set_num_rows(limit_ - num_rows_returned_);
+        if (limit_ != -1 && num_rows_returned_.Load() + row_batch->num_rows() >= limit_) {
+          row_batch->set_num_rows(limit_ - num_rows_returned_.Load());
           num_rows_returned_ += row_batch->num_rows();
           *eos = true;
           break;
@@ -140,7 +140,7 @@ Status SubplanNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos)
     subplan_eos_ = false;
   }
 
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 
@@ -149,7 +149,7 @@ Status SubplanNode::Reset(RuntimeState* state, RowBatch* row_batch) {
   input_eos_ = false;
   input_row_idx_ = 0;
   subplan_eos_ = false;
-  num_rows_returned_ = 0;
+  num_rows_returned_.Store(0);
   RETURN_IF_ERROR(child(0)->Reset(state, row_batch));
   // If child(1) is not open it means that we have just Reset() it and returned from
   // GetNext() without opening it again. It is not safe to call Reset() on the same

@@ -203,9 +203,9 @@ class ExecNode {
     DCHECK(containing_subplan_ == NULL);
     containing_subplan_ = sp;
   }
-  int64_t rows_returned() const { return num_rows_returned_; }
+  int64_t rows_returned() const { return num_rows_returned_.Load(); }
   int64_t limit() const { return limit_; }
-  bool ReachedLimit() { return limit_ != -1 && num_rows_returned_ >= limit_; }
+  bool ReachedLimit() { return limit_ != -1 && num_rows_returned_.Load() >= limit_; }
 
   RuntimeProfile* runtime_profile() { return runtime_profile_; }
   MemTracker* mem_tracker() { return mem_tracker_.get(); }
@@ -275,7 +275,7 @@ class ExecNode {
   TDebugOptions debug_options_;
 
   int64_t limit_;  // -1: no limit
-  int64_t num_rows_returned_;
+  AtomicInt64 num_rows_returned_;
 
   /// Runtime profile for this node. Owned by the QueryState's ObjectPool.
   RuntimeProfile* const runtime_profile_;

@@ -127,7 +127,7 @@ Status AggregationNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* 
 
   *eos = ReachedLimit() || (pagg_eos && curr_output_agg_idx_ >= aggs_.size());
   num_rows_returned_ += row_batch->num_rows();
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
   return Status::OK();
 }
 

@@ -111,6 +111,12 @@ class AtomicInt {
     return base::subtle::Release_AtomicExchange(&value_, new_val);
   }
 
+  ALWAYS_INLINE T operator+=(T value) { return Add(value); }
+
+  ALWAYS_INLINE T operator-=(T value) { return Add(-1 * value); }
+
+  ALWAYS_INLINE T operator++() { return Add(1); }
+
  private:
   T value_;
 

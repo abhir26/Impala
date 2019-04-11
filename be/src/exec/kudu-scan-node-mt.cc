@@ -82,7 +82,7 @@ Status KuduScanNodeMt::GetNext(RuntimeState* state, RowBatch* row_batch, bool* e
 
   num_rows_returned_ += row_batch->num_rows();
   if (ReachedLimit()) {
-    int num_rows_over = num_rows_returned_ - limit_;
+    int num_rows_over = num_rows_returned_.Load() - limit_;
     row_batch->set_num_rows(row_batch->num_rows() - num_rows_over);
     num_rows_returned_ -= num_rows_over;
     scan_token_ = nullptr;
@@ -91,7 +91,7 @@ Status KuduScanNodeMt::GetNext(RuntimeState* state, RowBatch* row_batch, bool* e
     scanner_.reset();
     *eos = true;
   }
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET_ATOMIC_SOURCE(rows_returned_counter_, num_rows_returned_);
 
   return Status::OK();
 }
