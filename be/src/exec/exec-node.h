@@ -203,9 +203,39 @@ class ExecNode {
     DCHECK(containing_subplan_ == NULL);
     containing_subplan_ = sp;
   }
-  int64_t rows_returned() const { return num_rows_returned_; }
+  int64_t rows_returned() const {
+    DCHECK(!IsScanNode() || IsMtNode());
+    return num_rows_returned_;
+  }
+  int64_t rows_returned_shared() const {
+    DCHECK(IsScanNode() && !IsMtNode());
+    return num_rows_returned_shared_.Load();
+  }
   int64_t limit() const { return limit_; }
-  bool ReachedLimit() { return limit_ != -1 && num_rows_returned_ >= limit_; }
+  bool ReachedLimit() {
+    DCHECK(!IsScanNode() || IsMtNode());
+    return limit_ != -1 && num_rows_returned_ >= limit_;
+  }
+  bool ReachedLimitShared() {
+    DCHECK(IsScanNode() && !IsMtNode());
+    return limit_ != -1 && num_rows_returned_shared_.Load() >= limit_;
+  }
+  void SetNumRowsReturned(int64_t value) {
+    DCHECK(!IsScanNode() || IsMtNode());
+    num_rows_returned_ = value;
+  }
+  void IncrementNumRowsReturned(int64_t value) {
+    DCHECK(!IsScanNode() || IsMtNode());
+    num_rows_returned_ += value;
+  }
+  void IncrementNumRowsReturnedShared(int64_t value) {
+    DCHECK(IsScanNode() && !IsMtNode());
+    num_rows_returned_shared_.Add(value);
+  }
+  void DecrementNumRowsReturned(int64_t value) { IncrementNumRowsReturned(-1 * value); }
+  void DecrementNumRowsReturnedShared(int64_t value) {
+    IncrementNumRowsReturnedShared(-1 * value);
+  }
 
   RuntimeProfile* runtime_profile() { return runtime_profile_; }
   MemTracker* mem_tracker() { return mem_tracker_.get(); }
@@ -275,7 +305,6 @@ class ExecNode {
   TDebugOptions debug_options_;
 
   int64_t limit_;  // -1: no limit
-  int64_t num_rows_returned_;
 
   /// Runtime profile for this node. Owned by the QueryState's ObjectPool.
   RuntimeProfile* const runtime_profile_;
@@ -316,6 +345,7 @@ class ExecNode {
       int* node_idx, ExecNode** root) WARN_UNUSED_RESULT;
 
   virtual bool IsScanNode() const { return false; }
+  virtual bool IsMtNode() const { return false; }
 
   /// Executes 'debug_action_' if 'phase' matches 'debug_phase_'.
   /// 'phase' must not be INVALID.
@@ -334,6 +364,8 @@ class ExecNode {
   Status QueryMaintenance(RuntimeState* state) WARN_UNUSED_RESULT;
 
  private:
+  int64_t num_rows_returned_;
+  AtomicInt64 num_rows_returned_shared_;
   /// Implementation of ExecDebugAction(). This is the slow path we take when there is
   /// actually a debug action enabled for 'phase'.
   Status ExecDebugActionImpl(

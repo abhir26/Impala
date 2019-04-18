@@ -165,17 +165,17 @@ Status UnnestNode::GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos) 
       if (row_batch->AtCapacity()) break;
     }
   }
-  num_rows_returned_ += row_batch->num_rows();
+  IncrementNumRowsReturned(row_batch->num_rows());
 
   // Checking the limit here is simpler/cheaper than doing it in the loop above.
   if (ReachedLimit()) {
     *eos = true;
-    row_batch->set_num_rows(row_batch->num_rows() - (num_rows_returned_ - limit_));
-    num_rows_returned_ = limit_;
+    row_batch->set_num_rows(row_batch->num_rows() - (rows_returned() - limit_));
+    SetNumRowsReturned(limit_);
   } else if (item_idx_ == coll_value_->num_tuples) {
     *eos = true;
   }
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET(rows_returned_counter_, rows_returned());
   return Status::OK();
 }
 

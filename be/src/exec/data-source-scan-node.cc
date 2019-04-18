@@ -319,7 +319,7 @@ Status DataSourceScanNode::GetNext(RuntimeState* state, RowBatch* row_batch, boo
   RETURN_IF_ERROR(ExecDebugAction(TExecNodePhase::GETNEXT, state));
   RETURN_IF_CANCELLED(state);
   RETURN_IF_ERROR(QueryMaintenance(state));
-  if (ReachedLimit()) {
+  if (ReachedLimitShared()) {
     *eos = true;
     return Status::OK();
   }
@@ -341,7 +341,7 @@ Status DataSourceScanNode::GetNext(RuntimeState* state, RowBatch* row_batch, boo
     {
       SCOPED_TIMER(materialize_tuple_timer());
       // copy rows until we hit the limit/capacity or until we exhaust input_batch_
-      while (!ReachedLimit() && !row_batch->AtCapacity() && InputBatchHasNext()) {
+      while (!ReachedLimitShared() && !row_batch->AtCapacity() && InputBatchHasNext()) {
         RETURN_IF_ERROR(MaterializeNextRow(state->local_time_zone(), tuple_pool, tuple));
         ++rows_read;
         int row_idx = row_batch->AddRow();
@@ -352,13 +352,13 @@ Status DataSourceScanNode::GetNext(RuntimeState* state, RowBatch* row_batch, boo
           row_batch->CommitLastRow();
           tuple = reinterpret_cast<Tuple*>(
               reinterpret_cast<uint8_t*>(tuple) + tuple_desc_->byte_size());
-          ++num_rows_returned_;
+          IncrementNumRowsReturnedShared(1);
         }
         ++next_row_idx_;
       }
-      if (ReachedLimit() || row_batch->AtCapacity() || input_batch_->eos) {
-        *eos = ReachedLimit() || input_batch_->eos;
-        COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+      if (ReachedLimitShared() || row_batch->AtCapacity() || input_batch_->eos) {
+        *eos = ReachedLimitShared() || input_batch_->eos;
+        COUNTER_SET(rows_returned_counter_, rows_returned_shared());
         COUNTER_ADD(rows_read_counter_, rows_read);
         return Status::OK();
       }

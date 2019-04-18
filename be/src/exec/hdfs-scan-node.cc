@@ -121,7 +121,7 @@ Status HdfsScanNode::GetNextInternal(
   RETURN_IF_CANCELLED(state);
   RETURN_IF_ERROR(QueryMaintenance(state));
 
-  if (ReachedLimit()) {
+  if (ReachedLimitShared()) {
     // LIMIT 0 case.  Other limit values handled below.
     DCHECK_EQ(limit_, 0);
     *eos = true;
@@ -135,14 +135,14 @@ Status HdfsScanNode::GetNextInternal(
     // This means that scanners might process and queue up more rows than are necessary
     // for the limit case but we want to avoid the synchronized writes to
     // num_rows_returned_.
-    num_rows_returned_ += row_batch->num_rows();
-    COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+    IncrementNumRowsReturnedShared(row_batch->num_rows());
+    COUNTER_SET(rows_returned_counter_, rows_returned_shared());
 
-    if (ReachedLimit()) {
-      int num_rows_over = num_rows_returned_ - limit_;
+    if (ReachedLimitShared()) {
+      int num_rows_over = rows_returned_shared() - limit_;
       row_batch->set_num_rows(row_batch->num_rows() - num_rows_over);
-      num_rows_returned_ -= num_rows_over;
-      COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+      DecrementNumRowsReturnedShared(num_rows_over);
+      COUNTER_SET(rows_returned_counter_, rows_returned_shared());
 
       *eos = true;
       SetDone();

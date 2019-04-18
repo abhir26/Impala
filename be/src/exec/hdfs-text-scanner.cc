@@ -415,7 +415,7 @@ Status HdfsTextScanner::ProcessRange(RowBatch* row_batch, int* num_tuples) {
       break;
     }
 
-    if (row_batch->AtCapacity() || scan_node_->ReachedLimit()) break;
+    if (row_batch->AtCapacity() || scan_node_->ReachedLimitShared()) break;
   }
   return Status::OK();
 }
@@ -446,7 +446,7 @@ Status HdfsTextScanner::GetNextInternal(RowBatch* row_batch) {
     int num_tuples;
     RETURN_IF_ERROR(ProcessRange(row_batch, &num_tuples));
   }
-  if (scan_node_->ReachedLimit()) {
+  if (scan_node_->ReachedLimitShared()) {
     eos_ = true;
     scan_state_ = DONE;
     return Status::OK();

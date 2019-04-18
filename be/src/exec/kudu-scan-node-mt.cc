@@ -80,18 +80,18 @@ Status KuduScanNodeMt::GetNext(RuntimeState* state, RowBatch* row_batch, bool* e
   }
   scanner_->KeepKuduScannerAlive();
 
-  num_rows_returned_ += row_batch->num_rows();
+  IncrementNumRowsReturned(row_batch->num_rows());
   if (ReachedLimit()) {
-    int num_rows_over = num_rows_returned_ - limit_;
+    int num_rows_over = rows_returned() - limit_;
     row_batch->set_num_rows(row_batch->num_rows() - num_rows_over);
-    num_rows_returned_ -= num_rows_over;
+    DecrementNumRowsReturned(num_rows_over);
     scan_token_ = nullptr;
     runtime_profile_->StopPeriodicCounters();
     scanner_->Close();
     scanner_.reset();
     *eos = true;
   }
-  COUNTER_SET(rows_returned_counter_, num_rows_returned_);
+  COUNTER_SET(rows_returned_counter_, rows_returned());
 
   return Status::OK();
 }

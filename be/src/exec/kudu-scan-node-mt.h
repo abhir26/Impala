@@ -38,6 +38,7 @@ class KuduScanNodeMt : public KuduScanNodeBase {
   virtual Status Open(RuntimeState* state);
   virtual Status GetNext(RuntimeState* state, RowBatch* row_batch, bool* eos);
   virtual void Close(RuntimeState* state);
+  virtual bool IsMtNode() const { return true; }
 
  private:
   /// Current scan token and corresponding scanner.

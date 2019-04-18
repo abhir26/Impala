@@ -81,13 +81,14 @@ ExecNode::ExecNode(ObjectPool* pool, const TPlanNode& tnode, const DescriptorTbl
     row_descriptor_(descs, tnode.row_tuples, tnode.nullable_tuples),
     resource_profile_(tnode.resource_profile),
     limit_(tnode.limit),
-    num_rows_returned_(0),
     runtime_profile_(RuntimeProfile::Create(
         pool_, Substitute("$0 (id=$1)", PrintThriftEnum(tnode.node_type), id_))),
     rows_returned_counter_(NULL),
     rows_returned_rate_(NULL),
     containing_subplan_(NULL),
     disable_codegen_(tnode.disable_codegen),
+    num_rows_returned_(0),
+    num_rows_returned_shared_(0),
     is_closed_(false) {
   runtime_profile_->SetPlanNodeId(id_);
   debug_options_.phase = TExecNodePhase::INVALID;

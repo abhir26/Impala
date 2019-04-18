@@ -47,6 +47,7 @@ class HdfsScanNodeMt : public HdfsScanNodeBase {
   virtual void Close(RuntimeState* state) override;
 
   virtual bool HasRowBatchQueue() const override { return false; }
+  virtual bool IsMtNode() const { return true; }
 
  private:
   /// Create and open new scanner for this partition type.
