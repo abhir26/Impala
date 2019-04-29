@@ -93,22 +93,35 @@ else
   [ -f "$CDH_PROPERTIES_FILE" ]
 fi
 
+# This should use CDH Hive by default, so explicitly set USE_CDP_HIVE.
+export USE_CDP_HIVE=false
+
 # Get Java version strings from cdh.properties. Tarballs
 # append a -<GBN> to these versions, and never use -SNAPSHOT.
 # The java versions are managed in ../impala-parent/pom.xml
 # and inherit from the CDH root pom.
-export IMPALA_HADOOP_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.hadoop.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export CDH_HADOOP_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.hadoop.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export IMPALA_HADOOP_VERSION=${CDH_HADOOP_VERSION}
 [[ -n $IMPALA_HADOOP_VERSION ]]
-export IMPALA_HADOOP_URL=${BUILD_REPO_BASE}/hadoop-${IMPALA_HADOOP_VERSION}.tar.gz
-export IMPALA_HBASE_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.hbase.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export CDH_HADOOP_URL=${BUILD_REPO_BASE}/hadoop-${IMPALA_HADOOP_VERSION}.tar.gz
+export IMPALA_HADOOP_URL=${CDH_HADOOP_URL}
+export CDH_HBASE_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.hbase.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export IMPALA_HBASE_VERSION=${CDH_HBASE_VERSION}
 [[ -n $IMPALA_HBASE_VERSION ]]
-export IMPALA_HBASE_URL=${BUILD_REPO_BASE}/hbase-${IMPALA_HBASE_VERSION}.tar.gz
-export IMPALA_HIVE_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.hive.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export CDH_HBASE_URL=${BUILD_REPO_BASE}/hbase-${IMPALA_HBASE_VERSION}.tar.gz
+export IMPALA_HBASE_URL=${CDH_HBASE_URL}
+export CDH_HIVE_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.hive.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export IMPALA_HIVE_VERSION=${CDH_HIVE_VERSION}
 [[ -n $IMPALA_HIVE_VERSION ]]
-export IMPALA_KUDU_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.kudu.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
-export IMPALA_HIVE_URL=${BUILD_REPO_BASE}/hive-${IMPALA_HIVE_VERSION}.tar.gz
+export CDH_HIVE_URL=${BUILD_REPO_BASE}/hive-${IMPALA_HIVE_VERSION}.tar.gz
+export IMPALA_HIVE_URL=${CDH_HIVE_URL}
+export CDH_KUDU_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.kudu.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export IMPALA_KUDU_VERSION=${CDH_KUDU_VERSION}
 [[ -n $IMPALA_KUDU_VERSION ]]
-export IMPALA_SENTRY_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.sentry.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
-export IMPALA_KUDU_URL=${BUILD_REPO_BASE}/kudu-${IMPALA_KUDU_VERSION}-'%(platform_label)'.tar.gz
+export CDH_KUDU_URL=${BUILD_REPO_BASE}/kudu-${IMPALA_KUDU_VERSION}-'%(platform_label)'.tar.gz
+export IMPALA_KUDU_URL=${CDH_KUDU_URL}
+export CDH_SENTRY_VERSION=$(cat $CDH_PROPERTIES_FILE | grep ^cdh.sentry.version | cut -d= -f2 | sed -e s,-SNAPSHOT,,)-${CDH_GBN}
+export IMPALA_SENTRY_VERSION=${CDH_SENTRY_VERSION}
 [[ -n $IMPALA_SENTRY_VERSION ]]
-export IMPALA_SENTRY_URL=${BUILD_REPO_BASE}/sentry-${IMPALA_SENTRY_VERSION}.tar.gz
+export CDH_SENTRY_URL=${BUILD_REPO_BASE}/sentry-${IMPALA_SENTRY_VERSION}.tar.gz
+export IMPALA_SENTRY_URL=${CDH_SENTRY_URL}
