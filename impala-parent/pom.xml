@@ -35,11 +35,6 @@ under the License.
     <jacoco.skip>true</jacoco.skip>
     <jacoco.data.file>${env.IMPALA_FE_TEST_COVERAGE_DIR}/jacoco.exec</jacoco.data.file>
     <jacoco.report.dir>${env.IMPALA_FE_TEST_COVERAGE_DIR}</jacoco.report.dir>
-    <test.hive.testdata>${project.basedir}/../testdata/target/AllTypes.txt</test.hive.testdata>
-    <backend.library.path>${env.IMPALA_HOME}/be/build/debug/service:${env.IMPALA_HOME}/be/build/release/service</backend.library.path>
-    <beeswax_port>21000</beeswax_port>
-    <impalad>localhost</impalad>
-    <testExecutionMode>reduced</testExecutionMode>
     <hadoop.version>${cdh.hadoop.version}</hadoop.version>
     <hive.version>${cdh.hive.version}</hive.version>
     <hive.major.version>${env.IMPALA_HIVE_MAJOR_VERSION}</hive.major.version>
