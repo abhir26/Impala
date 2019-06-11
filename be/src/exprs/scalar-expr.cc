@@ -63,14 +63,15 @@ namespace impala {
 
 const char* ScalarExpr::LLVM_CLASS_NAME = "class.impala::ScalarExpr";
 
-ScalarExpr::ScalarExpr(const ColumnType& type, bool is_constant)
+ScalarExpr::ScalarExpr(const ColumnType& type, bool is_constant, bool is_codegen_disabled)
   : Expr(type),
-    is_constant_(is_constant) {
-}
+    is_constant_(is_constant),
+    is_codegen_disabled_(is_codegen_disabled) {}
 
 ScalarExpr::ScalarExpr(const TExprNode& node)
   : Expr(node),
-    is_constant_(node.is_constant) {
+    is_constant_(node.is_constant),
+    is_codegen_disabled_(node.is_codegen_disabled) {
   if (node.__isset.fn) fn_ = node.fn;
 }
 
@@ -324,8 +325,11 @@ bool ScalarExpr::ShouldCodegen(const RuntimeState* state) const {
   //    key expression in a descriptor table.
   // 2. codegen is disabled by query option.
   // 3. there is an optimization hint to disable codegen and the expr can be interpreted.
+  // 4. Optimizer decided to disable codegen. Example: const expressions in VALUES()
+  //    which are evaluated only once.
   return state != nullptr && !state->CodegenDisabledByQueryOption()
-      && !(state->CodegenHasDisableHint() && IsInterpretable());
+      && !(state->CodegenHasDisableHint() && IsInterpretable())
+      && !is_codegen_disabled_;
 }
 
 int ScalarExpr::GetSlotIds(vector<SlotId>* slot_ids) const {

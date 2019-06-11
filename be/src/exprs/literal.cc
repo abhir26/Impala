@@ -145,43 +145,43 @@ Literal::Literal(const TExprNode& node)
 }
 
 Literal::Literal(ColumnType type, bool v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_BOOLEAN) << type;
   value_.bool_val = v;
 }
 
 Literal::Literal(ColumnType type, int8_t v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_TINYINT) << type;
   value_.tinyint_val = v;
 }
 
 Literal::Literal(ColumnType type, int16_t v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_SMALLINT) << type;
   value_.smallint_val = v;
 }
 
 Literal::Literal(ColumnType type, int32_t v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_INT) << type;
   value_.int_val = v;
 }
 
 Literal::Literal(ColumnType type, int64_t v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_BIGINT) << type;
   value_.bigint_val = v;
 }
 
 Literal::Literal(ColumnType type, float v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_FLOAT) << type;
   value_.float_val = v;
 }
 
 Literal::Literal(ColumnType type, double v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   if (type.type == TYPE_DOUBLE) {
     value_.double_val = v;
   } else if (type.type == TYPE_DECIMAL) {
@@ -204,26 +204,26 @@ Literal::Literal(ColumnType type, double v)
 }
 
 Literal::Literal(ColumnType type, const string& v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   value_.Init(v);
   DCHECK(type.type == TYPE_STRING || type.type == TYPE_CHAR || type.type == TYPE_VARCHAR)
       << type;
 }
 
 Literal::Literal(ColumnType type, const StringValue& v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   value_.Init(v.DebugString());
   DCHECK(type.type == TYPE_STRING || type.type == TYPE_CHAR) << type;
 }
 
 Literal::Literal(ColumnType type, const TimestampValue& v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_TIMESTAMP) << type;
   value_.timestamp_val = v;
 }
 
 Literal::Literal(ColumnType type, const DateValue& v)
-  : ScalarExpr(type, true) {
+  : ScalarExpr(type, true, false) {
   DCHECK_EQ(type.type, TYPE_DATE) << type;
   value_.date_val = v;
 }

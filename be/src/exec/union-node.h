@@ -67,6 +67,9 @@ class UnionNode : public ExecNode {
   /// materialized.
   const int first_materialized_child_idx_;
 
+  /// Number of const scalar expressions which will be codegened.
+  uint32_t num_const_scalar_expr_to_be_codegened_;
+
   /// Const exprs materialized by this node. These exprs don't refer to any children.
   /// Only materialized by the first fragment instance to avoid duplication.
   std::vector<std::vector<ScalarExpr*>> const_exprs_lists_;

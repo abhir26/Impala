@@ -38,6 +38,7 @@ UnionNode::UnionNode(ObjectPool* pool, const TPlanNode& tnode,
       tuple_id_(tnode.union_node.tuple_id),
       tuple_desc_(descs.GetTupleDescriptor(tuple_id_)),
       first_materialized_child_idx_(tnode.union_node.first_materialized_child_idx),
+      num_const_scalar_expr_to_be_codegened_(0),
       child_idx_(0),
       child_batch_(nullptr),
       child_row_idx_(0),
@@ -50,6 +51,7 @@ Status UnionNode::Init(const TPlanNode& tnode, RuntimeState* state) {
   DCHECK(tnode.__isset.union_node);
   DCHECK_EQ(conjuncts_.size(), 0);
   DCHECK(tuple_desc_ != nullptr);
+  const uint32_t num_scalar_expr_to_be_codegened = state->NumScalarExprNeedsCodegen();
   // Create const_exprs_lists_ from thrift exprs.
   const vector<vector<TExpr>>& const_texpr_lists = tnode.union_node.const_expr_lists;
   for (const vector<TExpr>& texprs : const_texpr_lists) {
@@ -58,6 +60,8 @@ Status UnionNode::Init(const TPlanNode& tnode, RuntimeState* state) {
     DCHECK_EQ(const_exprs.size(), tuple_desc_->slots().size());
     const_exprs_lists_.push_back(const_exprs);
   }
+  num_const_scalar_expr_to_be_codegened_ =
+    state->NumScalarExprNeedsCodegen() - num_scalar_expr_to_be_codegened;
   // Create child_exprs_lists_ from thrift exprs.
   const vector<vector<TExpr>>& thrift_result_exprs = tnode.union_node.result_expr_lists;
   for (int i = 0; i < thrift_result_exprs.size(); ++i) {
@@ -137,6 +141,11 @@ void UnionNode::Codegen(RuntimeState* state) {
   }
   runtime_profile()->AddCodegenMsg(
       codegen_status.ok(), codegen_status, codegen_message.str());
+  if (num_const_scalar_expr_to_be_codegened_ == 0 &&
+      !const_exprs_lists_.empty()) {
+    runtime_profile()->AppendExecOption("Codegen Disabled for const scalar expressions");
+  }
+
 }
 
 Status UnionNode::Open(RuntimeState* state) {

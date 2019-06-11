@@ -151,6 +151,9 @@ class RuntimeState {
   /// Prepare() are invoked.
   bool ScalarExprNeedsCodegen() const { return !scalar_exprs_to_codegen_.empty(); }
 
+  /// Returns the number of scalar expressions to be codegen'd.
+  uint32_t NumScalarExprNeedsCodegen() const { return scalar_exprs_to_codegen_.size(); }
+
   /// Check if codegen was disabled and if so, add a message to the runtime profile.
   void CheckAndAddCodegenDisabledMessage(RuntimeProfile* profile) {
     if (CodegenDisabledByQueryOption()) {

@@ -150,27 +150,30 @@ struct TExprNode {
   // Whether the Expr is constant according to the frontend.
   4: required bool is_constant
 
+  // If codegen is disabled for this Expr
+  5: required bool is_codegen_disabled
+
   // The function to execute. Not set for SlotRefs and Literals.
-  5: optional Types.TFunction fn
+  6: optional Types.TFunction fn
 
   // If set, child[vararg_start_idx] is the first vararg child.
-  6: optional i32 vararg_start_idx
+  7: optional i32 vararg_start_idx
 
-  7: optional TBoolLiteral bool_literal
-  8: optional TCaseExpr case_expr
-  9: optional TDateLiteral date_literal
-  10: optional TFloatLiteral float_literal
-  11: optional TIntLiteral int_literal
-  12: optional TInPredicate in_predicate
-  13: optional TIsNullPredicate is_null_pred
-  14: optional TLiteralPredicate literal_pred
-  15: optional TSlotRef slot_ref
-  16: optional TStringLiteral string_literal
-  17: optional TTupleIsNullPredicate tuple_is_null_pred
-  18: optional TDecimalLiteral decimal_literal
-  19: optional TAggregateExpr agg_expr
-  20: optional TTimestampLiteral timestamp_literal
-  21: optional TKuduPartitionExpr kudu_partition_expr
+  8: optional TBoolLiteral bool_literal
+  9: optional TCaseExpr case_expr
+  10: optional TDateLiteral date_literal
+  11: optional TFloatLiteral float_literal
+  12: optional TIntLiteral int_literal
+  13: optional TInPredicate in_predicate
+  14: optional TIsNullPredicate is_null_pred
+  15: optional TLiteralPredicate literal_pred
+  16: optional TSlotRef slot_ref
+  17: optional TStringLiteral string_literal
+  18: optional TTupleIsNullPredicate tuple_is_null_pred
+  19: optional TDecimalLiteral decimal_literal
+  20: optional TAggregateExpr agg_expr
+  21: optional TTimestampLiteral timestamp_literal
+  22: optional TKuduPartitionExpr kudu_partition_expr
 }
 
 // A flattened representation of a tree of Expr nodes, obtained by depth-first

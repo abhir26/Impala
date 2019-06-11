@@ -347,6 +347,9 @@ abstract public class Expr extends TreeNode<Expr> implements ParseNode, Cloneabl
   // analysisDone().
   private boolean isAnalyzed_ = false;
 
+  // Is codegen disabled for this expression ?
+  private boolean isCodegenDisabled_ = false;
+
   protected Expr() {
     type_ = Type.INVALID;
     selectivity_ = -1.0;
@@ -370,6 +373,7 @@ abstract public class Expr extends TreeNode<Expr> implements ParseNode, Cloneabl
     isConstant_ = other.isConstant_;
     fn_ = other.fn_;
     children_ = Expr.cloneList(other.children_);
+    isCodegenDisabled_ = other.isCodegenDisabled_;
   }
 
   public boolean isAnalyzed() { return isAnalyzed_; }
@@ -391,6 +395,10 @@ abstract public class Expr extends TreeNode<Expr> implements ParseNode, Cloneabl
   public boolean isAuxExpr() { return isAuxExpr_; }
   public void setIsAuxExpr() { isAuxExpr_ = true; }
   public Function getFn() { return fn_; }
+  public void disableCodegen() {
+    isCodegenDisabled_ = true;
+    for (Expr child: children_) {child.disableCodegen();}
+  }
 
   /**
    * Perform semantic analysis of node and all of its children.
@@ -743,6 +751,7 @@ abstract public class Expr extends TreeNode<Expr> implements ParseNode, Cloneabl
     msg.type = type_.toThrift();
     msg.is_constant = isConstant_;
     msg.num_children = children_.size();
+    msg.is_codegen_disabled = isCodegenDisabled_;
     if (fn_ != null) {
       TFunction thriftFn = fn_.toThrift();
       thriftFn.setLast_modified_time(fn_.getLastModifiedTime());
