@@ -136,7 +136,13 @@ public class ExprRewriterTest extends AnalyzerTest {
     // Constant select.
     RewritesOk("select 1, 2, 3, 4", 4, 4);
     // Values stmt.
-    RewritesOk("values(1, '2', 3, 4.1), (1, '2', 3, 4.1)", 8, 8);
+    RewritesOk("values(1+1+1, '2', 3, 4.1), (1+2+3, '2', 3, 4.1)",0,0);
+    RewritesOk("select * from (values(1 as c1, true as c2, 'abc' as c3),(100,false,'xyz')) as t",5,6);
+    /*RewritesOk("select count(c.c_custkey), count(v.tot_price) " + 
+                   "from tpch_nested_parquet.customer c, " +
+                   "(select sum(o_totalprice) tot_price from c.c_orders " +
+                   "union " +
+                   "select * from (values(1+1+1)) as tot_price) v ", 0 ,0);*/
     // Test WHERE-clause subqueries.
     RewritesOk("select id, int_col from functional.alltypes a " +
         "where exists (select 1 from functional.alltypes " +

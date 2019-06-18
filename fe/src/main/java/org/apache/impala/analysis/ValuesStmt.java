@@ -22,8 +22,11 @@ import java.util.List;
 import com.google.common.base.Preconditions;
 
 import static org.apache.impala.analysis.ToSqlOptions.DEFAULT;
+import static org.apache.impala.analysis.ToSqlOptions.REWRITTEN;
 import org.apache.impala.common.AnalysisException;
 import org.apache.impala.rewrite.ExprRewriter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Representation of a values() statement with a list of constant-expression lists.
@@ -33,6 +36,7 @@ import org.apache.impala.rewrite.ExprRewriter;
  * - No nesting of ValuesStmts
  */
 public class ValuesStmt extends UnionStmt {
+  private final static Logger LOG = LoggerFactory.getLogger(ValuesStmt.class);
 
   public ValuesStmt(List<UnionOperand> operands,
       List<OrderByElement> orderByElements, LimitElement limitElement) {
@@ -89,6 +93,11 @@ public class ValuesStmt extends UnionStmt {
    * Intentionally left empty to disable expression rewrite for values clause.
    */
   @Override
-  public void rewriteExprs(ExprRewriter rewriter) {
+  public void rewriteExprs(ExprRewriter rewriter) throws AnalysisException {
+    LOG.info("abhi " + analyzer_.isRootAnalyzer() + " " + toSql(DEFAULT) + " " + toSql(REWRITTEN));
+    if (!analyzer_.isRootAnalyzer()) {
+      super.rewriteExprs(rewriter);
+    }
+    
   }
 }
