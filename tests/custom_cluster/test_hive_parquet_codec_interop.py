@@ -17,6 +17,7 @@
 #
 # Tests for Hive-IMPALA parquet compression codec interoperability
 
+import os
 import pytest
 
 from tests.common.custom_cluster_test_suite import CustomClusterTestSuite
@@ -29,9 +30,25 @@ PARQUET_CODECS = ['none', 'snappy', 'gzip', 'zstd', 'zstd:7', 'lz4']
 
 class TestParquetInterop(CustomClusterTestSuite):
 
+  _test_tz_name = "PST8PDT"
+  _orig_tz_name = None
+
   @classmethod
   def get_workload(self):
     return 'functional-query'
+
+  @classmethod
+  def setup_class(cls):
+    super(TestParquetInterop, cls).setup_class()
+    cls._orig_tz_name = os.getenv('TZ')
+    os.environ["TZ"] = cls._test_tz_name
+
+  @classmethod
+  def teardown_class(cls):
+    if cls._orig_tz_name is None:
+      del os.environ['TZ']
+    else:
+      os.environ['TZ'] = cls._orig_tz_name
 
   @classmethod
   def add_test_dimensions(cls):
