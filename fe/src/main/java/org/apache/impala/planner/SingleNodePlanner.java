@@ -1499,7 +1499,10 @@ public class SingleNodePlanner {
       analyzer.markConjunctAssigned(e);
       result.add(normalizedJoinConjunct);
     }
-    if (!result.isEmpty()) return result;
+    if (!result.isEmpty()) {
+      Expr.removeDuplicates(result);
+      return result;
+    }
 
     // Construct join conjuncts derived from equivalence class membership.
     Set<TupleId> lhsTblRefIdsHs = new HashSet<>(lhsTblRefIds);
